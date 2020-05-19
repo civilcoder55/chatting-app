@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="en">
+{% load static %}
+{% load index %}
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+    <title>{{title}}</title>
+    <!-- Site favicon -->
+    <link rel="shortcut icon" type="image/x-icon" href="{% static 'images/favicon.ico' %}" />
+    <!-- /site favicon -->
+
+    <!-- Font Material stylesheet -->
+    <link rel="stylesheet" href="{% static 'fonts/material-design-iconic-font/css/material-design-iconic-font.min.css' %}" />
+    <!-- /font material stylesheet -->
+
+    <!-- Bootstrap stylesheet -->
+    <link href="{% static 'css/jumbo-bootstrap.css' %}" rel="stylesheet" />
+    <!-- /bootstrap stylesheet -->
+
+    <!-- Perfect Scrollbar stylesheet -->
+    <link href="{% static 'node_modules/perfect-scrollbar/css/perfect-scrollbar.css' %}" rel="stylesheet" />
+    <!-- /perfect scrollbar stylesheet -->
+
+    <!-- Form stylesheet -->
+    <link href="{% static 'css/jumbo-forms.css' %}" rel="stylesheet" />
+    <!-- /form stylesheet -->
+
+    <!-- Jumbo-core stylesheet -->
+    <link href="{% static 'css/jumbo-core.min.css' %}" rel="stylesheet" />
+    <!-- /jumbo-core stylesheet -->
+
+   
+
+    <link rel="stylesheet" href="{% static 'css/emojionearea.min.css' %}">
+</head>
+
+<body id="body" data-theme="dark-indigo">
+        <audio id="ping"><source src="{% static 'ping.mp3' %}" type="audio/mpeg"></audio>
+    <!-- Loader Backdrop -->
+    <div class="loader-backdrop">
+        <!-- Loader -->
+        <div class="loader">
+            <svg class="circular" viewBox="25 25 50 50">
+                <circle class="path" cx="50" cy="50" r="20" fill="none" stroke-width="2" stroke-miterlimit="10">
+                </circle>
+            </svg>
+        </div>
+        <!-- /loader-->
+    </div>
+    <!-- loader backdrop -->
+
+    <!-- Page container -->
+    <div class="gx-container">
+        <!-- Main Container -->
+        <div class="gx-main-container">
+            <!-- Main Header -->
+            <header class="main-header">
+               <nav class="navbar navbar-expand-lg bg-primary text-white">
+                                <h4 class="m-0">Django & Nodejs Chat App</h4>
+                                <div class="collapse navbar-collapse justify-content-end">
+                                    <div class="search-bar right-side-icon bg-transparent d-none d-sm-block">
+                                        <div class="form-group">
+                                            <input class="form-control border-0" title="" type="search" disabled>
+                                            <button class="search-icon" disabled>
+                                                <i class="zmdi zmdi-search zmdi-hc-lg"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                    
+                                    <form action="/users/update/" method="POST" enctype="multipart/form-data" >
+                                        {% csrf_token %}
+                                        <label class="gx-btn gx-flat-btn gx-btn-primary gx-btn-sm  ml-2 ml-xl-3 my-sm-0 mr-0" >
+                                            <input type="file" style="display: none;" onchange="this.form.submit()" name="pic">
+                                            Update Profile Picture
+                                        </label>
+                                    </form>
+            
+                                    <a href="{% url 'logout' %}" class="gx-btn gx-flat-btn gx-btn-primary gx-btn-sm  ml-2 ml-xl-3 my-sm-0 mr-0">Logout</a>
+            
+                                    <div class="ml-3 d-none d-md-block">
+                                        <ul class="header-notifications list-inline">
+                                            <li class="notification list-inline-item">
+                                                <a ><i class="zmdi zmdi-notifications-active"></i></a>
+                                            </li>
+                                            <li class="notification list-inline-item">
+                                                <a ><i class="zmdi zmdi-comment-alt-text"></i></a>
+                                            </li>
+                                        </ul>
+                                    </div>
+            
+                                    <div class="ml-3 ml-xl-5 d-none d-md-block">
+                                        <img alt="Remy Sharp" src="/users{{user.profile_pic.pic.url}}" class="rounded-circle size-40">
+                                    </div>
+                                </div>
+                            </nav>
+            </header>
+            
+            <!-- /main header -->
+        </div>
+    </div>
+
+
+<!-- Main Content -->
+<div class="gx-main-content">
+        <!--gx-wrapper-->
+        <div class="gx-wrapper">
+    
+            <div class="gx-module chat-module">
+                <div id="gxChatModuleSidebar" class="chat-sidenav">
+                    <div class="chat-sidenav-main">
+                        <div class="chat-sidenav-header">
+    
+
+    
+                            <ul class="nav tab-link nav-justified" role="tablist">
+                                <li class="nav-item">
+                                    <a class="nav-link active" data-toggle="tab" href="#chatList" role="tab"
+                                        aria-controls="chatList" aria-selected="true">Chats</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" data-toggle="tab" href="#contacts" role="tab"
+                                        aria-controls="contacts" aria-selected="true">Contacts</a>
+                                </li>
+                            </ul>
+                        </div>
+    
+                        <div class="chat-sidenav-content">
+                            <div class="tab-content">
+                                <div id="chatList" class="tab-pane active ps-custom-scrollbar" style="position: relative;">
+                                    <div class="chat-user" id="chat-users">
+                                        
+                                    {% for chat in chats %}
+                                        {% for dialog,last in chat.items %}
+                                            <div class="chat-user-item{% if dialog.first.username == chatWith or dialog.second.username == chatWith %} active {% endif %} " id ="{% if dialog.first.username == user.username %}{{dialog.second.username}}{% else %}{{dialog.first.username}}{% endif %}" {% if dialog.first.username == chatWith or dialog.second.username == chatWith %} {% else %} onclick="function c (){window.location.pathname = '/messenger/{% if dialog.first.username == user.username %}{{dialog.second.id}}{% else %}{{dialog.first.id}}{% endif %}' } c()" {% endif %}>
+                                                    <div class="chat-user-row row">
+                                                        <div class="chat-avatar col-2">
+                                                            <div class="chat-avatar-mode">
+                                                                <img src="{% if dialog.first.username == user.username %}/users{{dialog.second.profile_pic.pic.url}}{% else %}/users{{dialog.first.profile_pic.pic.url}}{% endif %}" class="user-avatar size-40" alt="Domnic Brown">
+                                                                <span class="chat-mode offline"></span>
+                                                            </div>
+                                                        </div>
+                                                        <div class="chat-info col-8">
+                                                            <span class="name h4">{% if dialog.first.username == user.username %}{{dialog.second.username}}{% else %}{{dialog.first.username}}{% endif %}</span>
+                                                            <div class="chat-info-des"> {{last|index:0|safe}}  </div>
+                                                            <div class="last-message-time">{{last|index:1}}</div>
+                                                        </div>
+                                                        <div class="chat-date col-2">
+                                                            <span id="noti-badge" class="badge badge-primary badge-circle">{% if last|index:2 > 0 %} {{last|index:2}} {% endif %}</span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            {% endfor %}
+                                    {% endfor %}
+
+
+                                
+
+
+
+
+
+
+    
+    
+    
+                                    </div>
+                                </div>
+    
+                                <div id="contacts" class="tab-pane ps-custom-scrollbar" style="position: relative;">
+                                    <div class="chat-user">
+                                        {% for contact in contactsList %}
+                                        <div class="chat-user-item " onclick="function c (){window.location.pathname = '/messenger/{{contact.id}}' } c()">
+                                            <div class="chat-user-row row">
+                                                <div class="chat-avatar col-2">
+                                                    <div class="chat-avatar-mode">
+                                                        <img src="/users{{contact.profile_pic.pic.url}}"
+                                                             class="user-avatar size-40" alt="Abbott">
+                                                        <span class="chat-mode offline"></span>
+                                                    </div>
+                                                </div>
+                                                <div class="chat-contact-col col-10">
+                                                    <span class="name h4">{{contact.username}}</span>
+                                                </div>
+                                            </div>
+                                        </div>  
+                                        {% endfor %}
+    
+    
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+    
+                <div class="chat-module-box">
+                        <div class="chat-box">
+                            <div class="chat-box-main">
+                                <div class="chat-main">
+                                    <div class="chat-main-header">
+                                        <a id="gxChatModuleSideNav" href="javascript:void(0)"
+                                           class="drawer-btn d-block action-btn action-btn d-lg-none mr-2">
+                                            <i class="zmdi zmdi-comment-text zmdi-hc-lg"></i>
+                                        </a>
+                                        <div class="chat-main-header-info">
+                                            <div class="chat-avatar mr-2">
+                                                <div class="chat-avatar-mode">
+                                                    <img src="/users{{chatWithUser.profile_pic.pic.url}}"
+                                                         class="user-avatar size-60" alt="">
+                                                    <span class="chat-mode offline"></span>
+                                                </div>
+                                            </div>
+                                            <div class="chat-contact-name" id ="m{{chatWith}}">{{chatWith}}</div>
+                                        </div>
+                                    </div>
+                                    <div class="chat-list-scroll" style="position: relative;">
+                                        <div class="chat-main-content" id='chatarea'>
+
+
+
+
+
+
+                                            {% for message in messages %}
+                                            <div class="d-flex flex-nowrap chat-item {% if message.sender.username == user.username %}flex-row-reverse{% endif %}" id={{message.id}} read="{% if message.sender.username != user.username %}{{message.read}}{% endif %}">
+                                                <img class="user-avatar"
+                                                     src="{% if message.sender.username == user.username %}/users{{user.profile_pic.pic.url}} {% else %}/users{{chatWithUser.profile_pic.pic.url}}{% endif %}" alt="...">
+                                                <div class="bubble">
+                                                    <div class="message">{{message.text|safe}}
+                                                    </div>
+                                                    <div class="time">{{message.time|time}}</div>
+                                                </div>
+                                            </div>
+                                            {% endfor %}
+
+
+                                           
+
+
+                                        </div>
+
+                                    </div>
+                                    
+                                    
+                                    <div class="chat-main-footer">
+                                            <div class="d-flex flex-row align-items-center">
+                                                <div class="col">
+            
+                                                    <div class="form-group">
+                                                        <input class="border-0 form-control chat-textarea" id="textarea"
+                                                            placeholder="Type and hit enter to send message" type="text">
+                                                    </div>
+                                                </div>
+                                                <div class="chat-sent">
+                                                    <a class="action-btn">
+                                                        <i class="zmdi  zmdi-mail-send" id="send"></i>
+                                                    </a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+
+
+
+
+            </div>
+    
+    
+        </div>
+        <!--/gx-wrapper-->
+
+        <!-- Footer -->
+<footer class="gx-footer">
+        <div class="d-flex flex-row justify-content-between">
+            <p> Copyright  © 2020 </p>
+        </div>
+    </footer>
+    <!-- /footer -->
+
+</div>
+<!-- /main content -->
+
+</div>
+<!-- /main container -->
+
+
+</div>
+<!-- /page container -->
+
+
+<!--Load JQuery-->
+<script src="{% static 'node_modules/jquery/dist/jquery.min.js' %}"></script>
+<!--Bootstrap JQuery-->
+<script src="{% static 'node_modules/bootstrap/dist/js/bootstrap.bundle.min.js' %}"></script>
+<!--Perfect Scrollbar JQuery-->
+<script src="{% static 'node_modules/perfect-scrollbar/dist/perfect-scrollbar.min.js' %}"></script>
+<!--Big Slide JQuery-->
+<script src="{% static 'node_modules/bigslide/dist/bigSlide.min.js' %}"></script>
+<!--wizard JQuery-->
+<script src="{% static 'node_modules/twitter-bootstrap-wizard/jquery.bootstrap.wizard.min.js' %}"></script>
+<script src="{% static 'js/jquery.validate.min.js' %}"></script>
+<!--Custom JQuery-->
+<script src="{% static 'js/functions.js' %}"></script>
+<script src="{% static 'js/custom/chat.js' %}"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/1.4.5/socket.io.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mustache.js/3.0.1/mustache.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.22.2/moment.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/js-cookie@rc/dist/js.cookie.min.js"></script>
+<script type="text/javascript" src="{% static 'js/emojionearea.js' %}"></script>
+{% include 'chat_templates.html'%}
+<script>
+var csrftoken=Cookies.get("csrftoken");function csrfSafeMethod(e){return/^(GET|HEAD|OPTIONS|TRACE)$/.test(e)}$.ajaxSetup({beforeSend:function(e,t){csrfSafeMethod(t.type)||this.crossDomain||e.setRequestHeader("X-CSRFToken",csrftoken)}});const $chat_user_section=document.querySelector("#chat-users"),chat_user_template=document.querySelector("#active-chat").innerHTML,ping=document.getElementById("ping"),socket=io("http://chat.backenddev.co/messenger",{path: '/socket'});function isInView(e){return $(e).visible()}socket.on("onlineUsers",e=>{[...$(".name.h4")].forEach(t=>{e.includes(t.textContent)?t.parentElement.parentElement.firstElementChild.lastElementChild.lastElementChild.className="chat-mode online":t.parentElement.parentElement.firstElementChild.lastElementChild.lastElementChild.className="chat-mode offline"}),e.includes([...$(".chat-main-header-info").children()][1].textContent)?[...$(".chat-main-header-info").children()][0].firstElementChild.lastElementChild.className="chat-mode online":[...$(".chat-main-header-info").children()][0].firstElementChild.lastElementChild.className="chat-mode offline"}),socket.on("message",e=>{$(".chat-contact-name")[0].id==`m${e.from}`&&createAwayText(e),away_instance(e),ping.play()}),function(e){var t=e(window);e.fn.visible=function(e,a,n){if(!(this.length<1)){var i=this.length>1?this.eq(0):this,r=i.get(0),c=t.width(),o=t.height(),s=(n=n||"both",!0!==a||r.offsetWidth*r.offsetHeight);if("function"==typeof r.getBoundingClientRect){var m=r.getBoundingClientRect(),d=m.top>=0&&m.top<o,l=m.bottom>0&&m.bottom<=o,h=m.left>=0&&m.left<c,f=m.right>0&&m.right<=c,u=e?d||l:d&&l,$=e?h||f:h&&f;if("both"===n)return s&&u&&$;if("vertical"===n)return s&&u;if("horizontal"===n)return s&&$}else{var g=t.scrollTop(),x=g+o,p=t.scrollLeft(),b=p+c,_=i.offset(),v=_.top,w=v+i.height(),E=_.left,y=E+i.width(),T=!0===e?w:v,I=!0===e?v:w,C=!0===e?y:E,S=!0===e?E:y;if("both"===n)return!!s&&x>=I&&T>=g&&b>=S&&C>=p;if("vertical"===n)return!!s&&x>=I&&T>=g;if("horizontal"===n)return!!s&&b>=S&&C>=p}}}}(jQuery),document.getElementById("send").addEventListener("click",e=>{e.preventDefault(),text=$(".emojionearea-editor").html().replace(/&nbsp;/g," ").trim(),text&&($.ajax({type:"POST",url:window.location,data:{text:text}}),createHomeText(text),home_instance(text),$(".emojionearea-editor").empty(),$("#textarea")[0].emojioneArea.content="")});var el=$("#textarea").emojioneArea();function createHomeText(e){chatarea=document.getElementById("chatarea");const t=document.createElement("div");t.className="d-flex flex-nowrap chat-item flex-row-reverse",text.includes("<img")?text=text.replace(/\s(?=[^<img]*<img)/g,"&nbsp;"):text=text.replace(/ /g,"&nbsp;"),t.innerHTML=`<img class="user-avatar" src="/users{{user.profile_pic.pic.url}}" alt="..."> <div class="bubble">  <div class="message">${text}  </div><div class="time">${moment((new Date).getTime()).format("h:mm a")}</div> </div>`,chatarea.appendChild(t),t.scrollIntoView()}function createAwayText(e){chatarea=document.getElementById("chatarea");const t=document.createElement("div");t.className="d-flex flex-nowrap chat-item",t.setAttribute("read","False"),t.id=e.mid,e.text.includes("<img")?text=e.text.replace(/\s(?=[^<img]*<img)/g,"&nbsp;"):text=e.text.replace(/ /g,"&nbsp;"),t.innerHTML=`<img class="user-avatar" src="/users${e.fromImage}" alt="..."> <div class="bubble">  <div class="message">${text}  </div><div class="time">${moment((new Date).getTime()).format("h:mm a")}</div> </div>`,chatarea.appendChild(t),isInView($(".chat-main-content").children().last())?t.scrollIntoView():$(`#${e.from}`).find("#noti-badge").text()?$(`#${e.from}`).find("#noti-badge").text(parseInt($(`#${e.from}`).find("#noti-badge").text())+1):$(`#${e.from}`).find("#noti-badge").text(1)}function home_instance(e){const t=Mustache.render(chat_user_template,{username:$(".chat-contact-name").text(),message:e,image:"{{chatWithUser.profile_pic.pic.url}}",time:moment((new Date).getTime()).format("h:mm a")});document.querySelector(`#${$(".chat-contact-name").text()}`)?update_home_instance(e):($chat_user_section.insertAdjacentHTML("afterbegin",t),setTimeout(()=>{$(`#${$(".chat-contact-name").text()}`).children().children()[0].children[0].children[1].className=[...$(".chat-main-header-info").children()][0].firstElementChild.lastElementChild.className},2e3))}function away_instance(e){const t=Mustache.render(chat_user_template,{username:e.from,message:e.text,fromId:e.fromId,image:e.fromImage,time:moment((new Date).getTime()).format("h:mm a")});document.querySelector(`#${e.from}`)?update_away_instance(e):($chat_user_section.insertAdjacentHTML("afterbegin",t),setTimeout(()=>{$(`#${e.from}`).children().children()[0].children[0].children[1].className="chat-mode online"},2e3))}function update_home_instance(e){e=e.includes("<img")?e.replace(/\s(?=[^<img]*<img)/g,"&nbsp;"):e.replace(/ /g,"&nbsp;"),$(`#${$(".chat-contact-name").text()}`).find(".chat-info-des").html(e),$(`#${$(".chat-contact-name").text()}`).find(".last-message-time").text(moment((new Date).getTime()).format("h:mm a")),$chat_user_section.insertBefore(document.querySelector(`#${$(".chat-contact-name").text()}`),$chat_user_section.firstChild)}function update_away_instance(e){e.text.includes("<img")?text=e.text.replace(/\s(?=[^<img]*<img)/g,"&nbsp;"):text=e.text.replace(/ /g,"&nbsp;"),$(`#${e.from}`).find(".chat-info-des").html(text),$(`#${e.from}`).find(".last-message-time").text(moment((new Date).getTime()).format("h:mm a")),$chat_user_section.insertBefore(document.querySelector(`#${e.from}`),$chat_user_section.firstChild),$(".chat-contact-name")[0].id!=`m${e.from}`&&($(`#${e.from}`).find("#noti-badge").text()?$(`#${e.from}`).find("#noti-badge").text(parseInt($(`#${e.from}`).find("#noti-badge").text())+1):$(`#${e.from}`).find("#noti-badge").text(1))}el[0].emojioneArea.on("ready",function(){document.querySelector(".emojionearea-editor").addEventListener("keypress",e=>{13==e.which&&(e.preventDefault(),document.getElementById("send").click())})}),$(".chat-list-scroll").on("scroll",()=>{isInView($(".chat-main-content").children().last())&&$(`#${$(".chat-contact-name").text()}`).find("#noti-badge").text()&&$(`#${$(".chat-contact-name").text()}`).find("#noti-badge").text(""),[...$("[read=False]")].forEach(e=>{isInView(e)&&($(e).attr("read","True"),socket.emit("read",e.id),badge=$(`#${$(".chat-contact-name").text()}`).find("#noti-badge"),badge.text()&&(0==badge.text()?badge.text(""):badge.text(parseInt(badge.text())-1)))})}),$(document).ready(function(){firstUnread=[...$("[read=False]")][0],firstUnread?firstUnread.scrollIntoView():$(".chat-main-content").children().last()[0].scrollIntoView(),[...$("[read=False]")].forEach(e=>{isInView(e)&&($(e).attr("read","True"),socket.emit("read",e.id),badge=$(`#${$(".chat-contact-name").text()}`).find("#noti-badge"),badge.text()&&(parseInt(badge.text())-1==0?badge.text(""):badge.text(parseInt(badge.text())-1)))})});
+</script>
+<script>
+var limit = {{THERE}}
+$(document).ready(function(){$(".chat-list-scroll").scroll(function(){0==$(".chat-list-scroll").scrollTop()&&limit&&$.ajax({url:"",data:{mid:$("#chatarea")[0].firstElementChild.id},success:function(l){var t=0;[...$(l).filter(".d-flex.flex-nowrap.chat-item")].forEach(l=>{$("#chatarea").prepend(l),t++}),$(".chat-list-scroll").scrollTop(75.15*t),limit=Boolean($(l).filter(".THERE")[0].id)}})})});
+</script>
+</body>
+</html>

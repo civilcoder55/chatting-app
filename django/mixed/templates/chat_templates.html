@@ -1,0 +1,23 @@
+{% load static %}
+<script id="active-chat" type="text/html">
+  <div class="chat-user-item" id="{% verbatim %}{{username}}{% endverbatim %}" onclick="function c (){window.location.pathname = '/messenger/{% verbatim %}{{fromId}}{% endverbatim %}' } c()">
+        <div class="chat-user-row row">
+            <div class="chat-avatar col-2">
+                <div class="chat-avatar-mode">
+                    <img src="/users{% verbatim %}{{image}}{% endverbatim %}"
+                        class="user-avatar size-40" alt="Garry Sobars">
+                        <span class="chat-mode offline"></span>
+                        </div>
+                </div>
+                <div class="chat-info col-8">
+                    <span class="name h4">{% verbatim %} {{username}} {% endverbatim %}</span>
+                    <div class="chat-info-des">{% verbatim %} {{{message}}} {% endverbatim %}</div>
+                    <div class="last-message-time">{% verbatim %} {{time}} {% endverbatim %} </div>
+
+                </div>
+                <div class="chat-date col-2">
+                        <span id="noti-badge" class="bg-primary rounded-circle badge text-white"></span>
+               </div>
+            </div>
+  </div>
+</script>
