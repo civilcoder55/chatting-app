@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+{% load static %}
+
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+    <title>{{title}}</title>
+    <link rel="shortcut icon" type="image/x-icon" href="{% static 'images/favicon.ico' %}" />
+    <link rel="stylesheet"
+        href="{% static 'fonts/material-design-iconic-font/css/material-design-iconic-font.min.css' %}" />
+    <link href="{% static 'css/jumbo-bootstrap.min.css' %}" rel="stylesheet" />
+    <link href="{% static 'css/jumbo-forms.min.css' %}" rel="stylesheet" />
+    <link href="{% static 'css/jumbo-core.min.css' %}" rel="stylesheet" />
+</head>
+
+<body id="body">
+    <div class="loader-backdrop">
+        <div class="loader">
+            <svg class="circular" viewBox="25 25 50 50">
+                <circle class="path" cx="50" cy="50" r="20" fill="none" stroke-width="2" stroke-miterlimit="10">
+                </circle>
+            </svg>
+        </div>
+    </div>
+    <div class="gx-container">
+        <div class="gx-main-container">
+            <header class="main-header">
+                <nav class="navbar navbar-expand-lg bg-primary text-white">
+                    <h4 class="m-0">SimpleChatio</h4>
+                    <div class="collapse navbar-collapse justify-content-end">
+                        <a href="{% url 'register' %}"
+                            class="gx-btn gx-flat-btn gx-btn-primary gx-btn-sm  ml-2 ml-xl-3 my-sm-0 mr-0">Register</a>
+                    </div>
+                </nav>
+            </header>
+
+        </div>
+    </div>
+
+    <div class="gx-main-content">
+        <div class="gx-wrapper">
+            <div
+                class="login-container d-flex justify-content-center align-items-center animated slideInUpTiny animation-duration-3">
+                <div class="login-content">
+                    <div class="login-header">
+                        <h4 class="m-0">Please login to access Chat App</h4>
+                    </div>
+                    <div class="login-form">
+                        <form method="POST">
+                            {% csrf_token %}
+                            {% if messages %}
+                            {% for error in messages %}
+                            <div class="shadow-lg alert alert-secondary fade show" role="alert">
+                                {{error}}
+                            </div>
+                            {% endfor %} {% endif %}
+                            <fieldset>
+
+                                <div class="form-group">
+                                    {{signin.username}}
+                                </div>
+
+                                <div class="form-group">
+                                    {{signin.password}}
+                                </div>
+
+                                <div class="form-group text-row-between">
+
+                                    <p>
+                                        <a href="{% url 'register' %}" title="Register">New user ? Register</a>
+                                    </p>
+                                </div>
+                                <button type="submit" class="gx-btn gx-btn-rounded gx-btn-primary">Login</button>
+                            </fieldset>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <footer class="gx-footer">
+            <div class="d-flex flex-row justify-content-between">
+                <p> Copyright © 2021</p>
+            </div>
+        </footer>
+
+    </div>
+
+    <script src="{% static 'js/jquery.min.js' %}"></script>
+    <script src="{% static 'js/bootstrap.bundle.min.js' %}"></script>
+    <script src="{% static 'js/functions.min.js' %}"></script>
+</body>
+
+</html>

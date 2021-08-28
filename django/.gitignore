@@ -1,0 +1,8 @@
+*.log
+*.pot
+*.pyc
+__pycache__/
+media/avatars/*
+!media/avatars/default.jpg
+.vscode
+staticfiles/*

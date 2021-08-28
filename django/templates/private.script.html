@@ -1,0 +1,210 @@
+{% load static %}
+
+<script>
+    Vue.prototype.window = window;
+    Vue.use(VueObserveVisibility);
+    const socket = io("http://127.0.0.1:3000/messenger", { path: "/socket" });
+    var app = new Vue({
+        el: "#app",
+        data: {
+            conversations: JSON.parse("{{conversations|escapejs}}"),
+            conversationID: JSON.parse("{{conversationID|escapejs}}"),
+            contacts: JSON.parse("{{contacts|escapejs}}"),
+            messages: JSON.parse("{{messages|escapejs}}"),
+            user: JSON.parse("{{user.jinfo|escapejs}}"),
+            chatWith: JSON.parse("{{chatWith|escapejs}}"),
+            onlineUsers: [],
+            lastSeenMessage: "",
+            input: "",
+            pagination: true,
+            audio: "",
+        },
+        methods: {
+            isRead(id, state) {
+                if (state) {
+                    this.lastSeenMessage = id;
+                }
+                return state;
+            },
+            scrollToLastSeen() {
+                if (this.lastSeenMessage) {
+                    $(`#m_${this.lastSeenMessage}`)[0].scrollIntoView();
+                } else {
+                    let element = $("#chatarea")[0].lastElementChild;
+                    if (element) element.scrollIntoView();
+                }
+            },
+            getInput() {
+                return this.input.getText().trim();
+            },
+            sendInput() {
+                if (this.getInput()) {
+                    let text = this.getInput();
+                    let timeStamp = new Date().getTime();
+                    let time = moment(timeStamp).format("h:mm A");
+                    this.messages.push({ sender_id: this.user.id, text, time });
+                    axios.post(window.location, {
+                        text: text,
+                    }, {
+                        headers: {
+                            "X-CSRFToken": Cookies.get("csrftoken"),
+                        }
+                    }).catch(err => { });
+
+                    this.$nextTick(() => {
+                        let element = $("#chatarea")[0].lastElementChild;
+                        if (element) element.scrollIntoView();
+                    });
+                    this.emptyInput();
+                    this.updateChatList({
+                        with: this.chatWith,
+                        text,
+                        time,
+                        timeStamp,
+                    });
+                    this.updateUnreadCount(this.conversationID, 0);
+                }
+            },
+            emptyInput() {
+                $(".emojionearea-editor").empty();
+                $("#textarea")[0].emojioneArea.content = "";
+            },
+
+            updateChatList(data, home = true) {
+                let found = false;
+                this.conversations.forEach((conversation) => {
+                    if (conversation.with.id == data.with.id) {
+                        conversation.lastMessageText = data.text;
+                        conversation.lastMessageTime = data.time;
+                        conversation.lastMessageTimeStamp = data.timeStamp;
+                        found = true;
+                    }
+                });
+                if (!found) {
+                    this.conversations.unshift({
+                        id: home ? this.conversationID : data.conversationID,
+                        lastMessageText: data.text,
+                        lastMessageTime: data.time,
+                        lastMessageTimeStamp: data.timeStamp,
+                        unreadCount: 0,
+                        with: home ? this.chatWith : data.with,
+                    });
+                } else {
+                    this.conversations.sort(function (a, b) {
+                        return b.lastMessageTimeStamp - a.lastMessageTimeStamp;
+                    });
+                }
+            },
+            updateUnreadCount(conversationID, count) {
+                this.conversations.forEach((conversation) => {
+                    if (conversation.id == conversationID) {
+                        switch (count) {
+                            case 0:
+                                conversation.unreadCount = 0
+                                break;
+                            case 1:
+                                conversation.unreadCount += 1;
+                                break;
+                            case -1:
+                                if (conversation.unreadCount > 0) conversation.unreadCount -= 1;
+                                break;
+                            default:
+                                break;
+                        }
+                    }
+                });
+            },
+            visibilityChanged(isVisible, entry) {
+                if (isVisible && !entry.target.getAttribute("data-isread")) {
+                    let id = entry.target.getAttribute("id").split("m_")[1];
+                    entry.target.setAttribute("data-seen", "true");
+                    socket.emit("readMessage", id),
+                    this.updateUnreadCount(this.conversationID, -1);
+                }
+            },
+        },
+        created() {
+            socket.on("onlineUsers", (data) => {
+                this.onlineUsers = data;
+            });
+
+            socket.on("newMessage", (data) => {
+                if (data.from.id == this.chatWith.id) {
+                    this.messages.push({
+                        id: data.id,
+                        sender_id: data.from.id,
+                        text: data.text,
+                        time: data.time,
+                        seen:false
+                    });
+                    this.updateChatList({
+                        conversationID: data.conversationID,
+                        text: data.text,
+                        time: data.time,
+                        timeStamp: data.timeStamp,
+                        with: data.from,
+                    });
+                    this.$nextTick(() => {
+                        if ($($(".chat-main-content").children().last()).visible()) {
+                            let element = $("#chatarea")[0].lastElementChild;
+                            if (element) element.scrollIntoView();
+                        } else {
+                            this.updateUnreadCount(data.conversationID, 1);
+                        }
+                    });
+                } else {
+                    this.updateChatList(
+                        {
+                            conversationID: data.conversationID,
+                            text: data.text,
+                            time: data.time,
+                            timeStamp: data.timeStamp,
+                            with: data.from,
+                        },
+                        false
+                    );
+                    this.updateUnreadCount(data.conversationID, 1);
+                }
+                this.audio.play();
+            });
+        },
+        mounted() {
+            var emojiArea = $("#textarea").emojioneArea();
+            emojiArea[0].emojioneArea.on("ready", () => {
+                $(".emojionearea-editor").keypress((e) => {
+                    if (e.which == 13) {
+                        e.preventDefault();
+                        this.sendInput();
+                    }
+                });
+            });
+            this.input = emojiArea[0].emojioneArea;
+            PerfectScrollbarInit();
+            this.scrollToLastSeen();
+
+            $(".chat-list-scroll").scroll(() => {
+                if ($(".chat-list-scroll").scrollTop() == 0 && this.pagination) {
+                    axios.post(window.location + 'history', {
+                        beforeID: this.messages[0].id,
+                    }, {
+                        headers: {
+                            "X-CSRFToken": Cookies.get("csrftoken"),
+                        }
+                    }).then((response) => {
+                        let messages = JSON.parse(response.data.messages);
+                        this.pagination = JSON.parse(response.data.pagination);
+                        this.messages.unshift(...messages);
+                        $(".chat-list-scroll").scrollTop(75.15 * messages.length);
+                    }).catch(err => { });
+                }
+
+                if ($($(".chat-main-content").children().last()).visible()) {
+                    this.updateUnreadCount(this.conversationID, 0);
+                }
+
+            });
+
+            this.audio = new Audio("{% static 'sounds/ping.mp3' %}");
+        },
+    });
+</script>

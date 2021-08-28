@@ -1,0 +1,73 @@
+version: "3.8"
+services:
+    redis:
+        hostname: 'redis'
+        image: 'redis'
+        container_name: simpleio_redis
+        networks:
+            - AppNetwork
+
+    mongodb:
+        hostname: 'mongodb'
+        image : mongo
+        container_name: simpleio_mongodb
+        environment:
+            - PUID=1000
+            - PGID=1000
+        volumes:
+            - mongo_chat_data:/data/db
+        networks:
+            - AppNetwork
+
+    nodejs:
+        hostname: 'nodejs'
+        build: ./node
+        container_name: simpleio_nodejs
+        networks:
+            - AppNetwork
+        ports:
+            - 3000:3000
+        volumes:
+            - ./node/:/usr/src/app/
+        env_file:
+            - ./django/.env
+        depends_on:
+            - mongodb
+
+    django:
+        hostname: 'django'
+        build: ./django
+        container_name: simpleio_django
+        volumes:
+            - ./django/:/usr/src/app/
+        networks:
+            - AppNetwork
+        env_file:
+            - ./django/.env
+        depends_on:
+            - mongodb
+            - nodejs
+            - redis
+    
+    nginx:
+        hostname: 'nginx'
+        build: ./nginx
+        container_name: simpleio_nginx
+        volumes:
+            - ./django/staticfiles/:/usr/src/app/staticfiles/
+        networks:
+            - AppNetwork
+        ports:
+            - 8000:80
+        depends_on:
+            - django
+    
+
+
+
+
+networks: 
+    AppNetwork:
+
+volumes:
+    mongo_chat_data:

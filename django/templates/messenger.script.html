@@ -1,0 +1,71 @@
+{% load static %}
+
+<script>
+  Vue.prototype.window = window;
+  const socket = io("http://127.0.0.1:3000/messenger", { path: "/socket" });
+  var app = new Vue({
+    el: "#app",
+    data: {
+      conversations: JSON.parse("{{ conversations|escapejs }}"),
+      contacts: JSON.parse("{{ contacts|escapejs }}"),
+      user: JSON.parse("{{ user.jinfo|escapejs }}"),
+      onlineUsers: [],
+      audio: "",
+    },
+    methods: {
+      updateChatList(data) {
+        let found = false;
+        this.conversations.forEach((conversation) => {
+          if (conversation.with.id == data.with.id) {
+            conversation.lastMessageText = data.text;
+            conversation.lastMessageTime = data.time;
+            conversation.lastMessageTimeStamp = data.timeStamp;
+            found = true;
+          }
+        });
+        if (!found) {
+          this.conversations.unshift({
+            id: data.chatID,
+            lastMessageText: data.text,
+            lastMessageTime: data.time,
+            lastMessageTimeStamp: data.timeStamp,
+            unreadCount: 0,
+            with: data.with,
+          });
+        } else {
+          this.conversations.sort(function (a, b) {
+            return b.lastMessageTimeStamp - a.lastMessageTimeStamp;
+          });
+        }
+      },
+      updateUnreadCount(conversationID) {
+        this.conversations.forEach((conversation) => {
+          if (conversation.id == conversationID) {
+            conversation.unreadCount += 1;
+          }
+        });
+      },
+    },
+    created() {
+      socket.on("onlineUsers", (data) => {
+        this.onlineUsers = data;
+      });
+
+      socket.on("newMessage", (data) => {
+        this.updateChatList({
+          chatID: data.chatID,
+          text: data.text,
+          time: data.time,
+          timeStamp: data.timeStamp,
+          with: data.from,
+        });
+        this.updateUnreadCount(data.conversationID);
+        this.audio.play();
+      });
+    },
+    mounted() {
+      PerfectScrollbarInit();
+      this.audio = new Audio("{% static 'sounds/ping.mp3' %}");
+    },
+  });
+</script>

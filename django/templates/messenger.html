@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+{% load static %}
+
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+    <title>{{title}}</title>
+    <link rel="shortcut icon" type="image/x-icon" href="{% static 'images/favicon.ico' %}" />
+    <link rel="stylesheet"
+        href="{% static 'fonts/material-design-iconic-font/css/material-design-iconic-font.min.css' %}" />
+    <link href="{% static 'css/jumbo-bootstrap.min.css' %}" rel="stylesheet" />
+    <link href="{% static 'css/perfect-scrollbar.min.css' %}" rel="stylesheet" />
+    <link href="{% static 'css/jumbo-forms.min.css' %}" rel="stylesheet" />
+    <link href="{% static 'css/jumbo-core.min.css' %}" rel="stylesheet" />
+</head>
+
+<body id="body">
+    <div class="loader-backdrop">
+        <div class="loader">
+            <svg class="circular" viewBox="25 25 50 50">
+                <circle class="path" cx="50" cy="50" r="20" fill="none" stroke-width="2" stroke-miterlimit="10">
+                </circle>
+            </svg>
+        </div>
+    </div>
+    <div class="gx-container">
+        <div class="gx-main-container">
+            <header class="main-header">
+                <nav class="navbar navbar-expand-lg bg-primary text-white">
+                    <h4 class="m-0">SimpleChatio</h4>
+                    <div class="collapse navbar-collapse justify-content-end">
+                        <form action="/users/update/" method="POST" enctype="multipart/form-data">
+                            {% csrf_token %}
+                            <label class="
+                    gx-btn gx-flat-btn gx-btn-primary gx-btn-sm
+                    ml-2 ml-xl-3
+                    my-sm-0
+                    mr-0
+                  ">
+                                <input type="file" style="display: none" onchange="this.form.submit()" name="pic" />
+                                Update Profile Picture
+                            </label>
+                        </form>
+
+                        <a href="{% url 'logout' %}" class="
+                  gx-btn gx-flat-btn gx-btn-primary gx-btn-sm
+                  ml-2 ml-xl-3
+                  my-sm-0
+                  mr-0
+                ">Logout</a>
+
+                        <div class="ml-3 ml-xl-5 d-none d-md-block">
+                            <img src="/users{{user.avatar.url}}" class="rounded-circle size-40" />
+                        </div>
+                    </div>
+                </nav>
+            </header>
+        </div>
+    </div>
+
+    <div class="gx-main-content" id="app">
+        <div class="gx-wrapper">
+            <div class="gx-module chat-module">
+                <div id="gxChatModuleSidebar" class="chat-sidenav">
+                    <div class="chat-sidenav-main">
+                        <div class="chat-sidenav-header">
+                            <ul class="nav tab-link nav-justified" role="tablist">
+                                <li class="nav-item">
+                                    <a class="nav-link active" data-toggle="tab" href="#chatList" role="tab"
+                                        aria-controls="chatList" aria-selected="true">Chats</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" data-toggle="tab" href="#contacts" role="tab"
+                                        aria-controls="contacts" aria-selected="true">Contacts</a>
+                                </li>
+                            </ul>
+                        </div>
+
+                        <div class="chat-sidenav-content">
+                            <div class="tab-content">
+                                <div id="chatList" class="tab-pane active ps-custom-scrollbar"
+                                    style="position: relative">
+                                    <div class="chat-user" id="chat-users">
+                                        <div v-for="conversation in conversations" class="chat-user-item" :id="conversation.id"
+                                            @click="window.location.pathname = '/messenger/'+ conversation.with.id">
+                                            <div class="chat-user-row row">
+                                                <div class="chat-avatar col-2">
+                                                    <div class="chat-avatar-mode">
+                                                        <img :src="conversation.with.avatar" class="user-avatar size-40"
+                                                            alt="Domnic Brown" />
+                                                        <span class="chat-mode"
+                                                            :class="onlineUsers.includes(conversation.with.id) ? 'online' : 'offline'"></span>
+                                                    </div>
+                                                </div>
+                                                <div class="chat-info col-8">
+                                                    <span class="name h4" v-text="conversation.with.username">
+                                                    </span>
+                                                    <div class="chat-info-des" v-text="conversation.lastMessageText"></div>
+                                                    <div class="last-message-time" v-text="conversation.lastMessageTime"></div>
+                                                </div>
+                                                <div class="chat-date col-2">
+                                                    <span class="badge badge-primary badge-circle"
+                                                        v-text="conversation.unreadCount > 0 ? conversation.unreadCount : ''">
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div id="contacts" class="tab-pane ps-custom-scrollbar" style="position: relative">
+                                    <div class="chat-user">
+                                        <div v-for=" contact in contacts" class="chat-user-item"
+                                            @click="window.location.pathname = '/messenger/' + contact.id">
+                                            <div class="chat-user-row row">
+                                                <div class="chat-avatar col-2">
+                                                    <div class="chat-avatar-mode">
+                                                        <img :src="contact.avatar" class="user-avatar size-40" />
+                                                        <span class="chat-mode"
+                                                            :class="onlineUsers.includes(contact.id) ? 'online' : 'offline'"></span>
+                                                    </div>
+                                                </div>
+                                                <div class="chat-contact-col col-10">
+                                                    <span class="name h4" v-text="contact.username"></span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="chat-module-box">
+                    <div class="chat-box">
+                        <div class="chat-box-main">
+                            <div class="chat-main">
+                                <div class="chat-list-scroll">
+                                    <div class="loader-view h-100">
+                                        <i class="zmdi zmdi-comment s-128 text-muted"></i>
+                                        <h1 class="text-muted">
+                                            Select User to start Chat
+                                        </h1>
+                                        <a id="gxChatModuleSideNav"
+                                            class="gx-btn gx-flat-btn gx-btn-primary drawer-btn d-block d-lg-none"
+                                            href="javascript:void(0)">
+                                            Select contact to start Chat
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <footer class="gx-footer">
+            <div class="d-flex flex-row justify-content-between">
+                <p> Copyright © 2021</p>
+            </div>
+        </footer>
+
+    </div>
+
+
+
+    <script src="{% static 'js/jquery.min.js' %}"></script>
+    <script src="{% static 'js/bootstrap.bundle.min.js' %}"></script>
+    <script src="{% static 'js/perfect-scrollbar.min.js' %}"></script>
+    <script src="{% static 'js/bigSlide.min.js' %}"></script>
+    <script src="{% static 'js/functions.min.js' %}"></script>
+    <script src="{% static 'js/chat.min.js' %}"></script>
+    <script src="{% static 'js/socket.io.min.js' %}"></script>
+    <script src="{% static 'js/vue@2.js' %}"></script>
+    {% include "messenger.script.html" %}
+
+
+</body>
+
+</html>

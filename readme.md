@@ -1,40 +1,75 @@
-# chatapp
+<p align="center">
+  <h3 align="center">Simple Chat APP</h3>
 
-# Django & Nodejs private chat app
+  <p align="center">
+   simple one to one private chat app built with django and nodejs socket.io.
+  </p>
 
-<a href="http://chat.backenddev.co"><img src="https://stream.backenddev.co/img/logo.svg"></a>
 
-> this project is a simple app written in python with django framework also with node.js socketio library .
 
-[chat.backenddev.co](https://chat.backenddev.co)
-<img src="/preview.gif" >
+</p>
 
-this app hosted via gunicorn & nginx on linux server & nodejs server as socket server
-static files served via nginx
+## About The Project
+very simple chat app not for usage for sure or serving real world purpose but in the journey of building it i searched for alot of useful stuff related to django framework .
+also open the world for me to study real world applications system design and how they work and scaling to serve million of users . 
+also i tried to practice on optimizing database quering and using docker + docker-compose. 
+#### it could be done using only django or node but i needed to build it with both just for practicing
+and here some quick stuff in this project
 
-simple one to one private chat application written in two frameworks with single database .. django to serve all frontend and handle authentication & storing messages in database (mongodb) and node.js app to handle sockets and real time stuff like online status / deliver messages for online users and mark message as read once user see it.
+- backend built with django .
+- used mongodb and djongo library as ORM .
+- using redis as chaching service to cache sessions and some repeated queries .
+- nodejs server as socketio server .
+- managed to implement socket authentication in nodejs using same session used in django .
+- managed to dockerizing the app using docker-compose with redis/mongo/nginx/nodejs/django services .
+- as backend dev i did my best for client-side logic and ui with help of simple vue-js and static html template . 
 
-i tried in this project to mix django with nodejs as one component
-both using same domain
-both using same database
-both using same authentication system --> django authentication and nodejs using middleware to authenticate cookies based on django session storage.
 
-```
-as in scr/auth.js
-```
 
-## Built With
+## database simple schema
+<img src="schema.png" >
 
-- Django
-- Socket.io
-- Mongodb
 
-## Authors
 
-- **Civilcoder** - [civilcoder](https://backenddev.co)
+
+## preview
+<img src="preview.gif" >
+
+
+
+
+
+
+### Usage
+
+1. Clone the repo
+    ```sh
+    git clone https://github.com/civilcoder55/chatapp.git
+    ```
+
+2. Build docker images
+    ```sh
+    sudo docker-compose build 
+    ```
+
+3. Run docker containers
+    ```sh
+    sudo docker-compose up -d
+    ```
+
+4. open url in browser
+    ```sh
+    http://127.0.0.1:8000/messenger
+<p align="center">
+  <img src="img.png" alt="Demo">
+</p>
+
+
+
 
 ## TO DO
 
-- refactor some code
-- adding some comments
-- add file send ability
+-   [ ] Adding fies/photo sharing .
+-   [ ] Adding messages indicators .
+-   [ ] writing tests .
+-   [ ] Refactor some codes .
